@@ -18,7 +18,12 @@ jobs:
           curl -fsSL https://railway.app/install.sh | sh
           echo "$HOME/.railway/bin" >> $GITHUB_PATH
 
+      - name: Link Railway Project (Only Run Once)
+        run: railway link 872c4fdc-be05-48e1-a12e-b57a6e5385b5
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
+
       - name: Deploy to Railway
-        run: railway up --service YOUR_SERVICE_NAME
+        run: railway up
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
