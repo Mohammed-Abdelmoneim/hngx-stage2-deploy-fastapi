@@ -22,7 +22,7 @@ jobs:
 
       - name: Setup SSH Key
         run: |
-          mkdir -vp ~/.ssh  # Use -v for verbose output
+          mkdir -p ~/.ssh || true  # Prevents exit if it already exists
           chmod 700 ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
