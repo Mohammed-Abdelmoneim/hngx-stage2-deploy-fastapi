@@ -13,17 +13,25 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Debug SSH Setup
+        run: |
+          echo "Checking current user and permissions"
+          whoami
+          ls -la ~/
+          ls -la ~/.ssh || echo "No .ssh directory found"
+
       - name: Setup SSH Key
         run: |
-          mkdir -p ~/.ssh  # Ensure the .ssh directory exists
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa  # Save the private key
-          chmod 600 ~/.ssh/id_rsa  # Set correct permissions
-          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts  # Add host to known_hosts
-          eval "$(ssh-agent -s)"  # Start SSH agent
-          ssh-add ~/.ssh/id_rsa  # Add key to agent
+          mkdir -vp ~/.ssh  # Use -v for verbose output
+          chmod 700 ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/id_rsa
 
       - name: Copy Project to Multipass VM
-        run: |
+        run: |g
           scp -r . ubuntu@${{ secrets.SERVER_IP }}:/home/ubuntu/hngx-stage2-deploy-fastapi
 
       - name: Restart API & Nginx
