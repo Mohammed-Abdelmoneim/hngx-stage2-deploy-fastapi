@@ -22,13 +22,21 @@ jobs:
 
       - name: Setup SSH Key
         run: |
-          mkdir -p ~/.ssh || true  # Prevents exit if it already exists
-          chmod 700 ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+          export SSH_DIR=$(mktemp -d)  # Create a temporary directory
+          echo "Using SSH directory: $SSH_DIR"
+
+          mkdir -p $SSH_DIR
+          chmod 700 $SSH_DIR
+
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > $SSH_DIR/id_rsa
+          chmod 600 $SSH_DIR/id_rsa
+
+          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> $SSH_DIR/known_hosts
+
           eval "$(ssh-agent -s)"
-          ssh-add ~/.ssh/id_rsa
+          ssh-add $SSH_DIR/id_rsa
+
+          echo "SSH setup complete"
 
       - name: Copy Project to Multipass VM
         run: |
