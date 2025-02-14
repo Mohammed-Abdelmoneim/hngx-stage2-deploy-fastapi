@@ -31,7 +31,7 @@ jobs:
           ssh-add ~/.ssh/id_rsa
 
       - name: Copy Project to Multipass VM
-        run: |g
+        run: |
           scp -r . ubuntu@${{ secrets.SERVER_IP }}:/home/ubuntu/hngx-stage2-deploy-fastapi
 
       - name: Restart API & Nginx
