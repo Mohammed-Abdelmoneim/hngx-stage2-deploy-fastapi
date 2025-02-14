@@ -1,18 +1,19 @@
-# Use official Python image
-FROM python:3.10
+# Use an official lightweight Python image
+FROM python:3.9-slim
 
-# Set working directory
+# Set work directory
 WORKDIR /app
 
-# Copy and install dependencies
+# Install dependencies
 COPY requirements.txt .
+RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-# Copy API files
+# Copy project files
 COPY . .
 
-# Expose API port
+# Expose the port FastAPI runs on
 EXPOSE 8000
 
-# Start API
+# Run the FastAPI application using Uvicorn
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

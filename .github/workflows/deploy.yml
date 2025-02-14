@@ -2,43 +2,48 @@ name: deploy
 
 on:
   push:
-    branches:
-      - main
-
+    branches: [main]
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: Debug SSH Setup
-        run: |
-          echo "Checking current user and permissions"
-          whoami
-          ls -la ~/
-          ls -la ~/.ssh || echo "No .ssh directory found"
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: foo
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # Update package index and install dependencies
+            sudo apt-get update -y
+            sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
 
-      - name: Setup SSH Key
-        run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
-          eval "$(ssh-agent -s)"
-          ssh-add ~/.ssh/id_rsa
+            # Add Docker's official GPG key
+            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+            sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 
-      - name: Copy Project to Multipass VM
-        run: |
-          scp -r . ubuntu@${{ secrets.SERVER_IP }}:/home/ubuntu/hngx-stage2-deploy-fastapi
+            # Install Docker
+            sudo apt-get update -y
+            sudo apt-get install -y docker-ce docker-ce-cli containerd.io
 
-      - name: Restart API & Nginx
-        run: |
-          ssh ubuntu@${{ secrets.SERVER_IP }} << 'EOF'
-          cd /home/ubuntu/hngx-stage2-deploy-fastapi
-          source venv/bin/activate
-          nohup uvicorn main:app --host 0.0.0.0 --port 8000 > log.txt 2>&1 &
-          sudo systemctl restart nginx
-          EOF
+            # Add the SSH user to the Docker group
+            sudo usermod -aG docker ubuntu
 
-#
+            # Install Docker Compose
+            sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            sudo chmod +x /usr/local/bin/docker-compose
+
+            # Verify installations
+            docker --version
+            docker-compose --version
+
+            # Navigate to the project directory and deploy
+            cd /home/ubuntu/
+            git clone https://github.com/Mohammed-Abdelmoneim/hngx-stage2-deploy-fastapi.git
+            cd hngx-stage2-deploy-fastapi/
+            git fetch origin main
+            git reset --hard origin/main
+            docker-compose up -d --build
