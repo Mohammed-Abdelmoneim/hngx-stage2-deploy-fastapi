@@ -13,12 +13,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Install SSH Key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+      - name: Setup SSH Key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Copy Project to Multipass VM
         run: |
@@ -29,6 +27,6 @@ jobs:
           ssh ubuntu@${{ secrets.SERVER_IP }} << 'EOF'
           cd /home/ubuntu/hngx-stage2-deploy-fastapi
           source venv/bin/activate
-          nohup uvicorn app:app --host 0.0.0.0 --port 8000 > log.txt 2>&1 &
+          nohup uvicorn main:app --host 0.0.0.0 --port 8000 > log.txt 2>&1 &
           sudo systemctl restart nginx
           EOF
