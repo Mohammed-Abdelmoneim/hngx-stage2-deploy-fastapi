@@ -32,7 +32,7 @@ jobs:
       - name: Authenticate Railway CLI
         run: |
           export PATH="$HOME/.railway/bin:$PATH"
-          echo "${{ secrets.RAILWAY_API_TOKEN }}" | railway login
+          echo "${{ secrets.RAILWAY_API_TOKEN }}" | railway login --ci
 
       - name: Link Railway Project
         run: |
