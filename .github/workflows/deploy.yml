@@ -15,11 +15,12 @@ jobs:
 
       - name: Setup SSH Key
         run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
-          eval "$(ssh-agent -s)"
-          ssh-add ~/.ssh/id_rsa
+          mkdir -p ~/.ssh  # Ensure the .ssh directory exists
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa  # Save the private key
+          chmod 600 ~/.ssh/id_rsa  # Set correct permissions
+          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts  # Add host to known_hosts
+          eval "$(ssh-agent -s)"  # Start SSH agent
+          ssh-add ~/.ssh/id_rsa  # Add key to agent
 
       - name: Copy Project to Multipass VM
         run: |
