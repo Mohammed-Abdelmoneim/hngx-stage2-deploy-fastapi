@@ -19,7 +19,7 @@ jobs:
           echo "$HOME/.railway/bin" >> $GITHUB_PATH
 
       - name: Authenticate Railway CLI
-        run: railway login --token $RAILWAY_API_TOKEN
+        run: echo $RAILWAY_API_TOKEN | railway login
         env:
           RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
 
@@ -29,6 +29,3 @@ jobs:
           RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
 
       - name: Deploy to Railway
-        run: railway up
-        env:
-          RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
