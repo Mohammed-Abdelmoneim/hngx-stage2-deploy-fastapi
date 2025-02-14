@@ -13,10 +13,16 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Install Railway CLI
+      - name: Install Railway CLI (Retry on Failure)
         run: |
-          curl -fsSL https://railway.app/install.sh | sh
-          echo "$HOME/.railway/bin" >> $GITHUB_PATH
+          for i in {1..3}; do
+            curl -fsSL https://railway.app/install.sh | sh && break
+            echo "Retrying in 5 seconds..."
+            sleep 5
+          done
+
+      - name: Verify Railway CLI Installation
+        run: railway --version || { echo "Railway CLI failed to install"; exit 1; }
 
       - name: Link Railway Project
         run: railway link --project 872c4fdc-be05-48e1-a12e-b57a6e5385b5 --token $RAILWAY_API_TOKEN
@@ -24,6 +30,6 @@ jobs:
           RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
 
       - name: Deploy to Railway
-        run: railway up --token $RAILWAY_API_TOKEN
+        run: railway up --service YOUR_SERVICE_NAME --token $RAILWAY_API_TOKEN
         env:
           RAILWAY_API_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
