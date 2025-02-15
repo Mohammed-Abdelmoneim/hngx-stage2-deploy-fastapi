@@ -13,18 +13,13 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Deploy to AWS
-        env:
-          SSH_HOST: "54.245.237.108"
-          SSH_USER: "moneim"
-          SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Deploy to AWS Server
         run: |
-          echo "$SSH_KEY" > private_key && chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key $SSH_USER@$SSH_HOST << 'EOF'
-            cd ~/hngx-stage2-deploy-fastapi
-            git pull origin main
-            source venv/bin/activate
-            pip install -r requirements.txt
-            sudo systemctl restart myapi  # Ensure you have a systemd service set up
-            sudo systemctl restart nginx
+          ssh -i private_key -o StrictHostKeyChecking=no moneim@54.245.237.108 << 'EOF'
+          cd ~/hngx-stage2-deploy-fastapi
+          git pull origin main
+          source venv/bin/activate
+          pip install -r requirements.txt
+          echo "" | sudo -S systemctl restart nginx
+          echo "" | sudo -S systemctl restart fastapi  # Replace with actual service name
           EOF
