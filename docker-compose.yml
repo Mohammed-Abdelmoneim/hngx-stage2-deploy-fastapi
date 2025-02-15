@@ -4,7 +4,7 @@ services:
     build: .
     container_name: fastapi-app
     ports:
-      - "8008:8008"
+      - "8036:8036"
 
   nginx:
     image: nginx:latest
