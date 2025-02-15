@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  pull_request:
 
 jobs:
   test:
@@ -11,14 +12,14 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
-      - name: Set Up Python
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: "3.10" # Adjust Python version as needed
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: |
           python -m venv venv
           source venv/bin/activate
@@ -27,4 +28,4 @@ jobs:
       - name: Run Tests
         run: |
           source venv/bin/activate
-          pytest
+          pytest  # Ensure you have tests written in your project
