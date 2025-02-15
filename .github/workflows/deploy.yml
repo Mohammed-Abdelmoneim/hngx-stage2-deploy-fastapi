@@ -15,8 +15,8 @@ jobs:
 
       - name: Deploy to AWS
         env:
-          SSH_HOST: "10.200.156.6"
-          SSH_USER: "ubuntu"
+          SSH_HOST: "54.245.237.108"
+          SSH_USER: "moneim"
           SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           echo "$SSH_KEY" > private_key && chmod 600 private_key
